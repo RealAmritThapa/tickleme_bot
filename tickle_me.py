@@ -24,6 +24,15 @@ def generate_response(prompt):
     )
     return response.choices[0].text
 
+def generate_image(prompt):
+    response = openai.Image.create(
+    prompt=prompt,
+    n=1,
+    size="1024x1024"
+    )
+    return response['data'][0]['url']
+    
+
 @client.event 
 async def on_ready():
     for guild in client.guilds:
@@ -60,6 +69,13 @@ async def on_message(message):
             print(user_message)
             if user_message:
                 await message.channel.send(user_message)
+    
+    if "tickleme image" in user_message:
+        user_message = user_message.replace("tickleme image", '')
+        response = generate_image(user_message)
+        if response:
+            await message.channel.send(response)
+
     
 
 client.run(TOKEN)
