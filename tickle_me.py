@@ -38,11 +38,9 @@ async def on_ready():
     for guild in client.guilds:
         if guild.name == SERVER:
             break
-
     
     print(f'{client.user.name} has connected to Discord')
-    for member in guild.members:
-        print(f'{member.name}')
+
 @client.event
 async def on_message(message):
     if message.author == client.user:
@@ -58,7 +56,6 @@ async def on_message(message):
             await message.channel.send("fuck")
     if "tickleme yell" in user_message:
         user_message = user_message.replace("tickleme yell", '')
-        print(user_message)
         if "me" in user_message:
             user_message = "eat a lumpy dick " + str(message.author.display_name)
             if user_message:
@@ -66,17 +63,17 @@ async def on_message(message):
         else:
 
             user_message = "fuck you " + str(user_message)
-            print(user_message)
             if user_message:
                 await message.channel.send(user_message)
     
     if "tickleme image" in user_message:
         user_message = user_message.replace("tickleme image", '')
+        await message.channel.send("Generating image please hold")
         response = generate_image(user_message)
         if response:
             await message.channel.send(response)
-
-    
+        else:
+            await message.channel.send("Dawg that fucking not appropriate")
 
 client.run(TOKEN)
 
