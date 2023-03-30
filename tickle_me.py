@@ -3,6 +3,7 @@ import os
 import openai
 import discord
 from dotenv import load_dotenv
+from discord.ext import commands 
 
 load_dotenv()
 
@@ -11,7 +12,11 @@ SERVER= os.getenv('MY_SERVER')
 openai.api_key = os.getenv('OPEN_AI_KEY')
 openai.Model.list()
 intents = discord.Intents.all()
-client = discord.Client(intents=intents)
+bot = commands.Bot(command_prefix='!', intents=intents)
+
+@bot.command()
+async def say(ctx, arg):
+    await ctx.send(arg)
 
 def generate_response(prompt):
     response= openai.Completion.create(
@@ -32,44 +37,26 @@ def generate_image(prompt):
     )
     return response['data'][0]['url']
     
-
-@client.event 
+@bot.event 
 async def on_ready():
-    for guild in client.guilds:
+    for guild in bot.guilds:
         if guild.name == SERVER:
             break
-    print(f'{client.user.name} has connected to Discord')
+    print(f'{bot.user.name} has connected to Discord')
+ 
+@bot.command()
+async def draw (ctx, prompt):
+    response = generate_image(prompt)
+    if response:
+        await ctx.send(response)
 
-@client.event
-async def on_message(message):
-    if message.author == client.user:
-        return
-    user_message = message.content.lower()
-    if "tickleme gpt" in user_message:
-        user_message = user_message.strip("tickleme gpt")
-        response = str(generate_response(user_message))
-        if response:
-            await message.channel.send(response)
-        else:
-            await message.channel.send("fuck")
-    if "tickleme yell" in user_message:
-        user_message = user_message.replace("tickleme yell", '')
-        if "me" in user_message:
-            user_message = "eat a lumpy dick " + str(message.author.display_name)
-            if user_message:
-                await message.channel.send(user_message)
-        else:
-            user_message = "fuck you " + str(user_message)
-            if user_message:
-                await message.channel.send(user_message)
+@bot.command()
+async def ask(ctx, *message):
+    message = ' '.join(message)
+    print(message)
+    response = generate_response(message)
+    if response:
+        await ctx.send(response)
     
-    if "tickleme image" in user_message:
-        user_message = user_message.replace("tickleme image", '')
-        response = generate_image(user_message)
-        if response:
-            await message.channel.send(response)
-
-    
-
-client.run(TOKEN)
+bot.run(TOKEN)
 
